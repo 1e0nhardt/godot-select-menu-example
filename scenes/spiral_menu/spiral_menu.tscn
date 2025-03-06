@@ -1,0 +1,144 @@
+[gd_scene load_steps=11 format=3 uid="uid://ckkjq40htm1y2"]
+
+[ext_resource type="Script" uid="uid://dsxvgmkckiovp" path="res://scenes/spiral_menu/spiral_menu.gd" id="1_qbndt"]
+[ext_resource type="Shader" uid="uid://dq2lta6bbxd6w" path="res://assets/blur.gdshader" id="2_bfggk"]
+[ext_resource type="Texture2D" uid="uid://bf1xlqoekdavd" path="res://assets/echoes_zelda.png" id="3_uduq4"]
+[ext_resource type="Script" uid="uid://mxt4vrp0wfoy" path="res://scenes/selection_indicator.gd" id="4_56xl3"]
+[ext_resource type="Script" uid="uid://i8hgre2udx6e" path="res://scenes/spiral_menu/spiral_container.gd" id="4_ul1fw"]
+[ext_resource type="Texture2D" uid="uid://b4588m20u250d" path="res://assets/icon-start.svg" id="5_qbndt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ac1uf"]
+shader = ExtResource("2_bfggk")
+shader_parameter/sigma = 3.3
+
+[sub_resource type="Shader" id="Shader_tgruv"]
+code = "shader_type canvas_item;
+
+uniform vec3 border_color: source_color = vec3(0.9, 0.9, 0.45);
+uniform float smooth_factor = 0.005;
+uniform float corner_radius = 0.05;
+uniform vec2 size = vec2(0.8, 0.85);
+uniform vec2 line_width = vec2(0.05, 0.04);
+uniform vec2 hollow = vec2(0.3, 0.2);
+uniform vec2 iResolution;
+uniform float radius = 0.65;
+
+float sdRoundedBox( in vec2 p, in vec2 b, in vec4 r )
+{
+    r.xy = (p.x>0.0)?r.xy : r.zw;
+    r.x  = (p.y>0.0)?r.x  : r.y;
+    vec2 q = abs(p)-b+r.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+}
+
+float circle(vec2 p, float r) {
+    return smoothstep(r + 0.01, r - 0.01, length(p));
+}
+
+void fragment() {
+    vec2 uv = vec2(UV.x, 1.0 - UV.y);
+    uv = uv * 2.0 - 1.0;
+    float d = 0.0;
+    float box_1 = sdRoundedBox(uv, size, vec4(corner_radius));
+    float box_2 = sdRoundedBox(uv, size + line_width, vec4(corner_radius));
+    d =  smoothstep(-smooth_factor, smooth_factor, box_1) * smoothstep(smooth_factor, -smooth_factor, box_2);
+    vec2 h = smoothstep(hollow - vec2(smooth_factor), hollow + vec2(smooth_factor), abs(uv));
+    d *= h.x * h.y;
+    
+    uv.x *= iResolution.x / iResolution.y;
+    float center_circle = circle(uv, radius) * 0.4;
+    d += center_circle;
+    
+    vec3 color = mix(border_color, vec3(0.4), center_circle);
+    COLOR = vec4(color, d);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ojtee"]
+shader = SubResource("Shader_tgruv")
+shader_parameter/border_color = Color(0.880165, 0.880165, 0.0985659, 1)
+shader_parameter/smooth_factor = 0.01
+shader_parameter/corner_radius = 0.05
+shader_parameter/size = Vector2(0.9, 0.93)
+shader_parameter/line_width = Vector2(0.05, 0.04)
+shader_parameter/hollow = Vector2(0.3, 0.4)
+shader_parameter/iResolution = Vector2(132, 132)
+shader_parameter/radius = 0.9
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pbg1s"]
+
+[node name="SpiralMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qbndt")
+
+[node name="Background" type="TextureRect" parent="."]
+texture_filter = 4
+material = SubResource("ShaderMaterial_ac1uf")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_uduq4")
+expand_mode = 1
+
+[node name="SelectionIndicator" type="Panel" parent="."]
+material = SubResource("ShaderMaterial_ojtee")
+layout_mode = 0
+offset_right = 132.0
+offset_bottom = 132.0
+pivot_offset = Vector2(66, 66)
+theme_override_styles/panel = SubResource("StyleBoxFlat_pbg1s")
+script = ExtResource("4_56xl3")
+
+[node name="DirectionIndicator" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="DirectionIndicator"]
+layout_mode = 0
+offset_left = 100.0
+offset_top = -20.0
+offset_right = 140.0
+offset_bottom = 20.0
+texture = ExtResource("5_qbndt")
+
+[node name="SpiralContainer" type="Container" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_ul1fw")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -42.5
+offset_top = -11.5
+offset_right = 42.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Echo name"
+horizontal_alignment = 1
+vertical_alignment = 1
