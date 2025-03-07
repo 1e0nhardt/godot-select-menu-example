@@ -67,15 +67,14 @@ func _unhandled_input(event: InputEvent) -> void:
             # Down:1, Up: -1
             new_direction.y = event.axis_value
 
-        if new_direction.length() > 0.01:
+        if new_direction.length() > 0.8:
             var angle_delta = - new_direction.angle_to(joystick_direction)
-            if abs(angle_delta) < TAU / 6:
-                accumulated_angle += angle_delta
-                joystick_direction = new_direction
+            accumulated_angle += angle_delta
+            joystick_direction = new_direction
 
-                index = (floori((accumulated_angle + TAU / spiral_container.base_amount / 4.0) / (TAU / spiral_container.base_amount)) + echoes.size()) % echoes.size()
+            index = (floori((accumulated_angle + TAU / spiral_container.base_amount / 4.0) / (TAU / spiral_container.base_amount)) + echoes.size()) % echoes.size()
 
-                direction_indicator.rotation = accumulated_angle
+            direction_indicator.rotation = accumulated_angle
 
 
     if event is InputEventKey:

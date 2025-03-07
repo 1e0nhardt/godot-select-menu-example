@@ -20,5 +20,5 @@
 ![spiral_menu](./assets/images/spiral_menu.png)
 
 ## 资源
-回声图片: https://zelda.fandom.com/wiki/Echo
-切换音效: https://www.kenney.nl/assets/interface-sounds
+- 回声图片: https://zelda.fandom.com/wiki/Echo
+- 切换音效: https://www.kenney.nl/assets/interface-sounds

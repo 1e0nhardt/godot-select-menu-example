@@ -14,6 +14,8 @@ var index: int = 0:
         index = (index + echoes.size()) % echoes.size()
         selection_indicator.global_position = radial_container.get_child(index).global_position - Vector2(4, 4)
         label.text = echoes[index].name
+var amount: int = 8
+var joystick_direction: Vector2
 
 var _select_interval_time: float = 0.1
 var _holding: bool = false
@@ -37,6 +39,18 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+    if event is InputEventJoypadMotion:
+        # Logger.info("MotionEvent: %s" % event)
+        if event.axis == 0:
+            joystick_direction.x = event.axis_value
+        if event.axis == 1:
+            # Down:1, Up: -1
+            joystick_direction.y = event.axis_value
+
+        if joystick_direction.length() > 0.8:
+            Logger.info(joystick_direction)
+            index = (floori(fmod(joystick_direction.angle() + TAU + TAU / amount / 2.0, TAU) / (TAU / amount)) + echoes.size()) % echoes.size()
+
     if event is InputEventKey:
         if event.pressed:
             if not event.is_echo():
@@ -67,8 +81,8 @@ func load_echoes() -> void:
         if file.ends_with(".png"):
             echoes.append(Echo.new(dir.get_current_dir(false) + "/" + file))
 
-    var random_index = randi_range(0, echoes.size() - 9)
-    echoes = echoes.slice(random_index, random_index + 8)
+    var random_index = randi_range(0, echoes.size() - 1 - amount)
+    echoes = echoes.slice(random_index, random_index + amount)
 
 
 func populate_echoes() -> void:
